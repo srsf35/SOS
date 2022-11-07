@@ -27,27 +27,29 @@ public class Board {
 		JLabel name = new JLabel("SOS");
 		JLabel player1 = new JLabel("Player 1");
 		JLabel player2 = new JLabel("Player 2");
-		JCheckBox simple = new JCheckBox("Simple Game", true); //TODO: Change the checkboxes to Button group
-		JCheckBox general = new JCheckBox("General Game");
-		JRadioButton s1, o1, s2, o2;
-		ButtonGroup pl1 = new ButtonGroup(); // Only one button group should exist since only one button will be active.
-		ButtonGroup pl2 = new ButtonGroup();
+		JRadioButton s1, o1, s2, o2, simpleGame, generalGame;
+		ButtonGroup pl1 = new ButtonGroup(); 
+		ButtonGroup gameMode = new ButtonGroup();
 		s1 = new JRadioButton("S");
 		o1 = new JRadioButton("O");
 		s2 = new JRadioButton("S");
 		o2 = new JRadioButton("O");
+		simpleGame = new JRadioButton("Simple Game");
+		generalGame = new JRadioButton("General Game");
 		
 		// Setting the size of components, layout is handled by layout manager.
 		s1.setSize(100,30);
 		o1.setSize(100, 30);
 		s2.setSize(100, 30);
 		o2.setSize(100, 30);
+		simpleGame.setSize(100, 30);
+		generalGame.setSize(100,30);
 		pl1.add(s1);
 		pl1.add(o1);
-		pl2.add(s2);
-		pl2.add(o2);
-		simple.setSize(100, 20);
-		general.setSize(120, 20);
+		pl1.add(s2);
+		pl1.add(o2);
+		gameMode.add(generalGame);
+		gameMode.add(simpleGame);
 		name.setSize(40, 20);
 		player1.setSize(100, 30);
 		player2.setSize(100,30);
@@ -86,21 +88,20 @@ public class Board {
 			}
 		});
 		
-		simple.addItemListener(new ItemListener() {
-			public void itemStateChanged(ItemEvent e) {
-				general.setSelected(false);
-				sos.setGameMode("Simple");
+		simpleGame.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				sos = new Simple();
+				adjustGrid(boardSize);
 			}
 		});
 		
-		general.addItemListener(new ItemListener() {
-			public void itemStateChanged(ItemEvent e) {
-				simple.setSelected(false);
-				sos.setGameMode("General");
+		generalGame.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				sos = new General();
+				adjustGrid(boardSize);
 			}
 		});
-		
-		
+			
 		// Adjusts the constraints and adds components to the frame.
 		c.fill = GridBagConstraints.BOTH;
 		c.gridx = 0; //Column
@@ -110,12 +111,13 @@ public class Board {
 		c.fill = GridBagConstraints.BOTH; //Just keeps the spacing consistent.
 		c.gridx = 1;
 		c.gridy = 0;
-		board.add(simple, c);
+		board.add(simpleGame, c);
+
 		
 		c.fill = GridBagConstraints.BOTH;
 		c.gridx = 2;
 		c.gridy = 0;
-		board.add(general,c);
+		board.add(generalGame, c);
 		
 		c.fill = GridBagConstraints.BOTH;
 		c.gridx = 3;
@@ -170,6 +172,7 @@ public class Board {
 	//Helper methods to adjust the size of the playspace based on user input. TODO: Error checking
 	public void adjustGrid(int boardSize) // TODO: change to private. Currently public for testing.
 	{
+		currPlayer.setText("Current Player: Player 1");
 		this.boardSize = boardSize;
 		if(playSpace.getComponentCount() > 0)
 		{
@@ -198,7 +201,9 @@ public class Board {
 				// Adds the responsiveness to the playspace
 				button.b.addActionListener(new ActionListener() {
 					public void actionPerformed(ActionEvent e) {
-						if(sos.takeTurn(button.indexx, button.indexy, currentMark.charAt(0)))
+						int result = sos.takeTurn(button.indexx, button.indexy, currentMark.charAt(0));
+						
+						if(result == 1)
 						{
 							button.b.setText(currentMark);
 							
@@ -210,6 +215,23 @@ public class Board {
 							{
 								currPlayer.setText("Current Player: Player 2");
 							}
+						}
+						else if(result == 2)
+						{
+							button.b.setText(currentMark);
+							if(sos.isPlayerOne())
+							{
+								currPlayer.setText("Winner: Player 1");
+							}
+							else 
+							{
+								currPlayer.setText("Winner: Player 2");
+							}
+						}
+						else if(result == 3)
+						{
+							button.b.setText(currentMark);
+							currPlayer.setText("A Draw!");
 						}
 					}
 				});
