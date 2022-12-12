@@ -1,0 +1,6 @@
+Game Number 0 
+Player one moved: (0, 0) S
+Player two moved: (2, 0) O
+Player one moved: (1, 1) O
+Player two moved: (2, 2) S
+Player two is winner. 

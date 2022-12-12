@@ -12,7 +12,7 @@ class GameModeTest {
 	void moveEmpty() // Checking if a turn was valid
 	{
 		Logic sos = new Logic();
-		sos.startGame(5);
+		sos.startGame(5, 0);
 		assertEquals(sos.takeTurn(0, 0, 'S'), 1);	
 	}
 	
@@ -20,7 +20,7 @@ class GameModeTest {
 	void moveOccupied() // Checking if a turn was invalid
 	{
 		Logic sos = new Logic();
-		sos.startGame(5);
+		sos.startGame(5, 0);
 		sos.takeTurn(0, 0, 'S');
 		assertEquals(sos.takeTurn(0, 0, 'S'), 0);	
 	}
@@ -29,7 +29,7 @@ class GameModeTest {
 	void full() // If the game is being declared as over after the board is full.
 	{
 		Logic sos = new Logic();
-		sos.startGame(3);
+		sos.startGame(3, 0);
 		for(int i = 0; i < 3; i++)
 		{
 			for(int j = 0; j < 3; j++)
@@ -45,7 +45,7 @@ class GameModeTest {
 	{
 		General sos = new General();
 		int turn = -1;
-		sos.startGame(3);
+		sos.startGame(3, 0);
 		for(int i = 0; i < 3; i++)
 		{
 			for(int j = 0; j < 3; j++)
@@ -61,7 +61,7 @@ class GameModeTest {
 	{
 		Simple sos = new Simple();
 		int turn = -1;
-		sos.startGame(3);
+		sos.startGame(3, 0);
 		for(int i = 0; i < 3; i++)
 		{
 			for(int j = 0; j < 3; j++)
@@ -76,7 +76,7 @@ class GameModeTest {
 	void generalScore() // Tests that general game is scoring.
 	{
 		General sos = new General();
-		sos.startGame(3);
+		sos.startGame(3, 0);
 		sos.takeTurn(0, 0, 'S');
 		sos.takeTurn(0, 1, 'O');
 		sos.takeTurn(0, 2, 'S');
@@ -87,7 +87,7 @@ class GameModeTest {
 	void generalPlayer1Win() // Test player 1 winning a general game.
 	{
 		General sos = new General();
-		sos.startGame(3);
+		sos.startGame(3, 0);
 		sos.takeTurn(0, 0, 'S');
 		sos.takeTurn(0, 1, 'O');
 		sos.takeTurn(0, 2, 'S');
@@ -105,7 +105,7 @@ class GameModeTest {
 	void simplePlayer1Win() // Tests Player 1 winning a simple game.
 	{
 		Simple sos = new Simple();
-		sos.startGame(3);
+		sos.startGame(3, 0);
 		sos.takeTurn(0, 0, 'S');
 		sos.takeTurn(0, 1, 'O');
 		sos.takeTurn(0, 2, 'S');
