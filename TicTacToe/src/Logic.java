@@ -1,9 +1,24 @@
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 
 public class Logic 
 {
-	protected boolean playerOne = true; //Current player can be seen as the boolean question to is it player one's turn?
-	protected char[][] board; //Char board that keeps track of the current board state.
+	protected boolean playerOne = true; // Current player can be seen as the boolean question: is it player one's turn?
+	protected char[][] board; // Char board that keeps track of the current board state.
+	protected File recording = new File("recording.txt"); // File all games record their move to.
+	protected boolean isRecording;
 	
+	
+	Logic(boolean recording)
+	{
+		isRecording = recording;
+	}
+	
+	Logic()
+	{
+		isRecording = false;
+	}
 	//Returns if it is currently player one's turn.
 	public boolean isPlayerOne()
 	{
@@ -27,6 +42,11 @@ public class Logic
 
 	}
 	
+	public void toggleRecord() // Toggles recording
+	{
+		isRecording = !isRecording;
+	}
+	
 	//If the board state is full and play cannot continue.
 	protected boolean over()
 	{
@@ -46,8 +66,31 @@ public class Logic
 	}
 	
 	//Starts the game and sets the board to the correct size.
-	public void startGame(int boardSize)
+	public void startGame(int boardSize, int gameNumber)
 	{
+		if(isRecording)
+		{
+			try 
+			{	
+				if(gameNumber == 0) //Deletes recordings from previous sessions.
+				{
+					FileWriter myWriter = new FileWriter("recording.txt");
+					myWriter.write("Game Number " + gameNumber + " \n");
+					myWriter.close();
+				}
+				else
+				{
+					FileWriter myWriter = new FileWriter("recording.txt", true);
+					myWriter.write("Game Number " + gameNumber + " \n");
+					myWriter.close();
+				}
+				
+			} 
+			catch (IOException e) 
+			{
+				
+			}
+		}
 		board = new char[boardSize][boardSize];
 	}
 }

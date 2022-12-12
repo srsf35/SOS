@@ -5,12 +5,14 @@ import java.awt.event.*;
 import javax.swing.*;
 
 public class Board {
-	static volatile String currentMark = "";
-	JPanel playSpace; // TODO: Set name as playspace so that the components of board can be searched rather.
+	static volatile String currentMark = " ";
+	JPanel playSpace; 
 	JFrame board; 
 	JLabel currPlayer;
 	Logic sos = new Logic();
 	private int boardSize = 3;
+	private int gameNumber = 0; // What game it is.
+	private boolean isRecording = false;
 
 	public Board()
 	{		
@@ -36,6 +38,7 @@ public class Board {
 		o2 = new JRadioButton("O");
 		simpleGame = new JRadioButton("Simple Game");
 		generalGame = new JRadioButton("General Game");
+		JCheckBox recordGame = new JCheckBox("Record game?");
 		
 		// Setting the size of components, layout is handled by layout manager.
 		s1.setSize(100,30);
@@ -53,6 +56,7 @@ public class Board {
 		name.setSize(40, 20);
 		player1.setSize(100, 30);
 		player2.setSize(100,30);
+		recordGame.setSize(100,30);
 		
 		//Listener to change the board size based on user input.
 		usrInput.addActionListener(new ActionListener() {
@@ -70,11 +74,20 @@ public class Board {
 		});
 		
 		s2.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
+			public void actionPerformed(ActionEvent e) {	
 				currentMark = "S";
 			}
 		});
 		
+		//Starts recording the game.
+		recordGame.addItemListener(new ItemListener() {
+			public void itemStateChanged(ItemEvent e) {
+				sos.toggleRecord();
+				isRecording = !isRecording;
+				gameNumber = 0;
+				adjustGrid(boardSize);
+			}
+		});
 		
 		o1.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -90,14 +103,14 @@ public class Board {
 		
 		simpleGame.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				sos = new Simple();
+				sos = new Simple(isRecording);
 				adjustGrid(boardSize);
 			}
 		});
 		
 		generalGame.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				sos = new General();
+				sos = new General(isRecording);
 				adjustGrid(boardSize);
 			}
 		});
@@ -123,7 +136,12 @@ public class Board {
 		c.gridx = 3;
 		c.gridy = 0;
 		board.add(usrInput,c);
-
+		
+		c.fill = GridBagConstraints.BOTH;
+		c.gridx = 4;
+		c.gridy = 0;
+		board.add(recordGame,c);
+		
 		c.fill = GridBagConstraints.BOTH;
 		c.gridx = 0;
 		c.gridy = 1;
@@ -169,25 +187,29 @@ public class Board {
 		playSpace.setVisible(true);
 	}
 	
-	//Helper methods to adjust the size of the playspace based on user input. TODO: Error checking
-	public void adjustGrid(int boardSize) // TODO: change to private. Currently public for testing.
+	//Helper methods to adjust the size of the playspace based on user input. 
+	public void adjustGrid(int boardSize) 
 	{
 		currPlayer.setText("Current Player: Player 1");
 		this.boardSize = boardSize;
-		if(playSpace.getComponentCount() > 0)
+		
+		if(playSpace.getComponentCount() > 0) //Resets the components on the board after the board is reset.
 		{
 			playSpace.removeAll();
 		}
-		if(boardSize < 3) //TODO: Add catch for this exception
+		if(boardSize < 3) 
 		{
 			throw new IllegalArgumentException("Board size is less than three");
 		}
+		
 		playSpace.setLayout(new GridLayout(boardSize, boardSize));
+		
+		//Adds the buttons to the play space.
 		for(int i = 0; i < boardSize; i++)
 		{
 			for(int j = 0; j < boardSize; j++)
 			{
-				class Square
+				class Square //A square is what the players mark with either an S or an O. Therefore it is composed of a button and its coordinates.
 				{
 					public JButton b;
 					public int indexx;
@@ -201,44 +223,53 @@ public class Board {
 				// Adds the responsiveness to the playspace
 				button.b.addActionListener(new ActionListener() {
 					public void actionPerformed(ActionEvent e) {
-						int result = sos.takeTurn(button.indexx, button.indexy, currentMark.charAt(0));
+						//The results from taking a turn.
+						final int nextTurn = 1;
+						final int winner = 2;
+						final int draw = 3;
 						
-						if(result == 1)
+						if(currentMark.charAt(0) != ' ') //Prevents input when neither an S or O is selected.
 						{
-							button.b.setText(currentMark);
+							int result = sos.takeTurn(button.indexx, button.indexy, currentMark.charAt(0)); //Results in one of three outcomes.
 							
-							if(sos.isPlayerOne())
+							if(result == nextTurn) //Game is not over and another turn should be taken.
 							{
-								currPlayer.setText("Current Player: Player 1");
+								button.b.setText(currentMark);
+								
+								if(sos.isPlayerOne())
+								{
+									currPlayer.setText("Current Player: Player 1");
+								}
+								else 
+								{
+									currPlayer.setText("Current Player: Player 2");
+								}
 							}
-							else 
+							else if(result == winner) //Game has finished with a winner.
 							{
-								currPlayer.setText("Current Player: Player 2");
+								button.b.setText(currentMark);
+								if(sos.isPlayerOne())
+								{
+									currPlayer.setText("Winner: Player 1");
+								}
+								else 
+								{
+									currPlayer.setText("Winner: Player 2");
+								}
 							}
-						}
-						else if(result == 2)
-						{
-							button.b.setText(currentMark);
-							if(sos.isPlayerOne())
+							else if(result == draw) //Game has finished in a draw.
 							{
-								currPlayer.setText("Winner: Player 1");
+								button.b.setText(currentMark);
+								currPlayer.setText("A Draw!");
 							}
-							else 
-							{
-								currPlayer.setText("Winner: Player 2");
-							}
-						}
-						else if(result == 3)
-						{
-							button.b.setText(currentMark);
-							currPlayer.setText("A Draw!");
-						}
+						}		
 					}
 				});
 				playSpace.add(button.b);
 			}
 		}
 		playSpace.revalidate();
-		sos.startGame(boardSize);
+		sos.startGame(boardSize, gameNumber);
+		gameNumber++;
 	}	
 }
